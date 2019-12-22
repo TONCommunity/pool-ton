@@ -108,11 +108,11 @@ class Default:
                 user_adr=user_adr,
                 link=link
             )
-            is_admin = 1 if self.user._id == pool.creator else 0
-            keyboard = self.inline_buttons(
-                self.button('POOL_PARTICIPANTS'),
-                f'pool_participants {pool._id} {is_admin}'
-            )
+            # is_admin = 1 if self.user._id == pool.creator else 0
+            # keyboard = self.inline_buttons(
+            #     self.button('POOL_PARTICIPANTS'),
+            #     f'pool_participants {pool._id} {is_admin}'
+            # )
         return message, keyboard
 
     def adr_status_checker(self, context):
@@ -211,28 +211,32 @@ class Default:
             keyboard.append([back_button])
         return telegram.InlineKeyboardMarkup(keyboard)
 
-    def pool_list_keyboard(self, page, last_page, is_public):
-        if last_page < 2:
-            return None
+    def pool_list_keyboard(self, page, last_page, is_public, pool_id, is_admin):
+        keyboard = []
         if is_public:
             event = 'pool_info public'
         else:
             event = 'pool_info public'
-        left_button = telegram.InlineKeyboardButton(
-            self.button('LEFT_BUTTON'),
-            callback_data=f'{event} {page-1 if page!=0 else last_page-1}'
+        if last_page > 1:
+            left_button = telegram.InlineKeyboardButton(
+                self.button('LEFT_BUTTON'),
+                callback_data=f'{event} {page-1 if page!=0 else last_page-1}'
+            )
+            middle_button = telegram.InlineKeyboardButton(
+                f'{page+1}/{last_page}',
+                callback_data=config.IGNORE_CALLBACK
+            )
+            right_button = telegram.InlineKeyboardButton(
+                self.button('RIGHT_BUTTON'),
+                callback_data=f'{event} {page+1 if page!=last_page-1 else 0}'
+            )
+            keyboard.append([left_button, middle_button, right_button])
+        files_button = telegram.InlineKeyboardButton(
+            self.button('POOL_PARTICIPANTS'),
+            callback_data=f'pool_participants {pool_id} {is_admin}'
         )
-        middle_button = telegram.InlineKeyboardButton(
-            f'{page+1}/{last_page}',
-            callback_data=config.IGNORE_CALLBACK
-        )
-        right_button = telegram.InlineKeyboardButton(
-            self.button('RIGHT_BUTTON'),
-            callback_data=f'{event} {page+1 if page!=last_page-1 else 0}'
-        )
-        return telegram.InlineKeyboardMarkup([
-            [left_button, middle_button, right_button]
-        ])
+        keyboard.append([files_button])
+        return telegram.InlineKeyboardMarkup(keyboard)
 
     def main_reply_keyboard(self):
         keyboard = [
@@ -437,7 +441,8 @@ class Message(Default):
         if pools:
             pool = pools[0]
             keyboard = self.pool_list_keyboard(
-                0, len(pools), is_public=is_public
+                0, len(pools), is_public,
+                pool._id, int(self.user._id == pool.creator)
             )
             message, kb = self.get_pool_message(pool, is_public)
             keyboard = kb if kb else keyboard
@@ -727,11 +732,12 @@ class Callback(Default):
         page = int(page)
         pools = self.get_pool_list(is_public=is_public)
         if pools and page < len(pools):
+            pool = pools[page]
             self.user.state = 'main_menu'
             keyboard = self.pool_list_keyboard(
-                page, len(pools), is_public=is_public
+                page, len(pools), is_public,
+                pool._id, int(self.user._id == pool.creator)
             )
-            pool = pools[page]
             message, kb = self.get_pool_message(pool, is_public)
             keyboard = kb if kb else keyboard
         else:
