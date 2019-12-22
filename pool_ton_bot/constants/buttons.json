@@ -1,0 +1,82 @@
+{
+    "POOL_CREATE": {
+        "en": "Create pool",
+        "ru": "Создать пул"
+    },
+    "POOL_LIST": {
+        "en": "My pools",
+        "ru": "Мои пулы"
+    },
+    "POOL_PUBLIC_LIST": {
+        "en": "Public pools",
+        "ru": "Публичные пулы"
+    },
+    "SETTINGS": {
+        "en": "Settings",
+        "ru": "Настройки"
+    },
+    "FEEDBACK": {
+        "en": "Feedback",
+        "ru": "Обратная связь"
+    },
+    "CHANGE_LANGUAGE": {
+        "en": "Language",
+        "ru": "Язык"
+    },
+    "REPLY": {
+        "en": "Reply",
+        "ru": "Ответить"
+    },
+    "REQUEST": {
+        "en": "Send request",
+        "ru": "Подать заявку"
+    },
+    "BACK": {
+        "en": "Back",
+        "ru": "Назад"
+    },
+    "SKIP": {
+        "en": "Skip",
+        "ru": "Пропустить"
+    },
+    "LEFT_BUTTON": {
+        "en": "⬅️",
+        "ru": "⬅️"
+    },
+    "RIGHT_BUTTON": {
+        "en": "➡️",
+        "ru": "➡️"
+    },
+    "BLANK_BUTTON": {
+        "en": " ",
+        "ru": " "
+    },
+    "POOL_PUBLIC": {
+        "en": "Public",
+        "ru": "Публичный"
+    },
+    "POOL_NONPUBLIC": {
+        "en": "Non-public",
+        "ru": "Непубличный"
+    },
+    "POOL_PRIVATE": {
+        "en": "Private",
+        "ru": "Приватный"
+    },
+    "POOL_DEPOSIT": {
+        "en": "Check deposit",
+        "ru": "Проверить оплату"
+    },
+    "APPROVE": {
+        "en": "Approve",
+        "ru": "Принять"
+    },
+    "REJECT": {
+        "en": "Reject",
+        "ru": "Отклонить"
+    },
+    "POOL_PARTICIPANTS": {
+        "en": "Get archive with scripts",
+        "ru": "Получить архив со скриптами"
+    }
+}

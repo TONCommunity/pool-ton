@@ -1,0 +1,464 @@
+;; Pool smartcontract
+
+(tuple) new_tuple() asm "NIL";
+(tuple, ()) ~append_int(tuple t1, int t2) asm(t1 t2) "COMMA";
+
+() store_data(seqno, pubkey, config, admins, members, whitelist, grams) impure {
+  set_data(begin_cell()
+    .store_uint(seqno, 32)
+    .store_uint(pubkey, 256)
+    .store_dict(config)
+    .store_dict(admins)
+    .store_dict(members)
+    .store_dict(whitelist)
+    .store_grams(grams)
+  .end_cell());
+}
+
+;; seqno pubkey config admins members whitelist grams
+(int, int, cell, cell, cell, cell, int) load_data() {
+  slice cs = get_data().begin_parse();
+  var res = (cs~load_uint(32),
+            cs~load_uint(256),
+            cs~load_dict(),
+            cs~load_dict(),
+            cs~load_dict(),
+            cs~load_dict(),
+            cs~load_grams());
+  cs.end_parse();
+  return res;
+}
+
+cell pack_config(withdrawals, pool_open, pool_lifetime, destination_wc, destination_addr, total_amount, min_stake, max_stake) {
+  return begin_cell()
+    .store_dict(withdrawals)
+    .store_uint(pool_open, 32)
+    .store_uint(pool_lifetime, 25) ;; limited to ~ 388 days
+    .store_int(destination_wc, 8)
+    .store_uint(destination_addr, 256)
+    .store_grams(total_amount)
+    .store_grams(min_stake)
+    .store_grams(max_stake)
+  .end_cell();
+}
+
+;; config -> withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake
+_ unpack_config(config) {
+  slice cs = config.begin_parse();
+  var res = (cs~load_dict(),
+            cs~load_uint(32),
+            cs~load_uint(25),
+            cs~load_int(8),
+            cs~load_uint(256),
+            cs~load_grams(),
+            cs~load_grams(),
+            cs~load_grams());
+  cs.end_parse();
+  return res;
+}
+
+() send_message_back(addr, ans_tag, query_id, body, grams, mode) impure {
+  ;; int_msg_info$0 ihr_disabled:Bool bounce:Bool bounced:Bool src:MsgAddress -> 011000
+  var msg = begin_cell()
+    .store_uint(0x18, 6)
+    .store_slice(addr)
+    .store_grams(grams)
+    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+    .store_uint(ans_tag, 32)
+    .store_uint(query_id, 64);
+  if (body >= 0) {
+    msg~store_uint(body, 32);
+  }
+  send_raw_message(msg.end_cell(), mode);
+}
+
+() return_stake(addr, query_id, reason) impure {
+  return send_message_back(addr, 0xee6f454c, query_id, reason, 0, 64);
+}
+
+() send_confirmation(addr, query_id, comment) impure {
+  return send_message_back(addr, 0xf374484c, query_id, comment, 1000000000, 3);
+}
+
+int received_grams() impure {
+  (_, _, _, _, cell members, _, _) = load_data();
+
+  int result = 0;
+  ifnot (members.dict_empty?()) {
+    int index = -1;
+    do {
+      (index, slice value, int found) = members.udict_get_next?(256, index);
+      if (found) {
+        result += value~load_grams();
+      }
+    } until (~ found);
+  }
+  return result;
+}
+
+() process_transfer(s_addr, msg_value) impure {
+  (int seqno, int pubkey, cell config, cell admins, cell members, cell whitelist, int grams) = load_data();
+  (cell withdrawals, int pool_open, int pool_lifetime, int destination_wc, int destination_addr,
+  int total_amount, int min_stake, int max_stake) = unpack_config(config);
+  (int src_wc, int src_addr) = parse_std_addr(s_addr);
+
+  ;; grams from destination address
+  if ((src_wc == destination_wc) & (src_addr == destination_addr)) {
+    grams += msg_value;
+    store_data(seqno, pubkey, config, admins, members, whitelist, grams);
+    return ();
+  }
+
+  ;; reject transactions when pool is closed
+  if (now() > (pool_open + pool_lifetime)) {
+    ;; pool closed (reason 0)
+    return return_stake(s_addr, 0, 0);
+  }
+
+  ;; whitelist check
+  int whitelisted = -1;
+  ifnot (whitelist.dict_empty?()) {
+    (slice value, whitelisted) = whitelist.udict_get?(256, src_addr);
+  }
+  ifnot (whitelisted) {
+    ;; not in whitelist (reason 1)
+    return return_stake(s_addr, 0, 1);
+  }
+
+  ;; get member stake
+  int member_stake = 0;
+  (slice value, int found) = members.udict_get?(256, src_addr);
+  if (found) {
+    member_stake = value~load_grams();
+  }
+
+  ;; gram amount check
+  if (member_stake + msg_value - 1000000000 > max_stake) {
+    ;; stake bigger (reason 2)
+    return return_stake(s_addr, 0, 2);
+  }
+
+  if (msg_value - 1000000000 < min_stake) {
+    ;; stake smaller (reason 3)
+    return return_stake(s_addr, 0, 3);
+  }
+
+  msg_value -= 1000000000;
+  throw_unless(44, msg_value);
+  accept_message();
+
+  ;; member stake update
+  member_stake += msg_value;
+  grams += msg_value;
+  members~udict_set_builder(256, src_addr, begin_cell()
+    .store_grams(member_stake));
+
+  store_data(seqno, pubkey, config, admins, members, whitelist, grams);
+  return send_confirmation(s_addr, 0, 0);
+}
+
+() recover_stake(op, s_addr, query_id) impure {
+  (int seqno, int pubkey, cell config, cell admins, cell members, cell whitelist, int grams) = load_data();
+  (cell withdrawals, int pool_open, int pool_lifetime, int destination_wc, int destination_addr,
+  int total_amount, int min_stake, int max_stake) = unpack_config(config);
+
+  ;; not recover in open pool
+  if (now() <= (pool_open + pool_lifetime)) {
+    return return_stake(s_addr, query_id, op);
+  }
+
+  (_, int src_addr) = parse_std_addr(s_addr);
+
+  ;; no credit for sender
+  (slice value, int found) = members.udict_get?(256, src_addr);
+  ifnot (found) {
+    return return_stake(s_addr, query_id, op);
+  }
+
+  ;; withdrawals check
+  (_, int found) = withdrawals.udict_get?(256, src_addr);
+  if (found) {
+    return return_stake(s_addr, query_id, op);
+  }
+
+  ;; member stake update
+  int member_stake = value~load_grams();
+  int received_grams = received_grams();
+  int part = member_stake * 10000 / received_grams;
+  int amount = part * grams / 10000;
+
+  if (received_grams == grams) {
+    amount = member_stake;
+  }
+
+  withdrawals~udict_set_builder(256, src_addr, begin_cell().store_grams(amount));
+  config = pack_config(withdrawals, pool_open, pool_lifetime, destination_wc, destination_addr,
+  total_amount, min_stake, max_stake);
+
+  store_data(seqno, pubkey, config, admins, members, whitelist, grams);
+
+  send_raw_message(begin_cell()
+    .store_uint(0x18, 6)
+    .store_slice(s_addr)
+    .store_grams(amount)
+    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+    .store_uint(0xf96f7324, 32)
+    .store_uint(query_id, 64)
+  .end_cell(), 64);
+}
+
+() send_grams(op, s_addr, cs, query_id) impure {
+  (int seqno, int pubkey, cell config,
+  cell admins, cell members, cell whitelist, int grams) = load_data();
+
+  (_, int src_addr) = parse_std_addr(s_addr);
+
+  ;; admin check
+  (slice value, int found) = admins.udict_get?(256, src_addr);
+  ifnot (found) {
+    return return_stake(s_addr, query_id, op);
+  }
+
+  ;; dest addr check
+  var msg_addr = cs~load_msg_addr();
+  (int msg_destination_wc, int msg_destination_addr) = parse_std_addr(msg_addr);
+  (cell withdrawals, int pool_open, int pool_lifetime, int destination_wc, int destination_addr,
+  int total_amount, int min_stake, int max_stake) = unpack_config(config);
+
+  if ((destination_addr != 0) &
+     (msg_destination_addr != destination_addr) &
+     (msg_destination_wc != destination_wc)) {
+    return return_stake(s_addr, query_id, op);
+  }
+
+  ;; grams check
+  if (grams < total_amount) {
+    return return_stake(s_addr, query_id, op);
+  }
+
+  ;; destination address update
+  config = pack_config(withdrawals, pool_open, pool_lifetime, msg_destination_wc, msg_destination_addr,
+  total_amount, min_stake, max_stake);
+
+  ;; grams update
+  store_data(seqno, pubkey, config, admins, members, whitelist, 0);
+  send_confirmation(s_addr, 0, op);
+  send_raw_message(begin_cell()
+    .store_uint(0x18, 6)
+    .store_slice(msg_addr)
+    .store_grams(grams)
+    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+    .store_uint(0xf96f7324, 32)
+    .store_uint(query_id, 64)
+  .end_cell(), 3);
+}
+
+() add_whitelist(op, s_addr, cs, query_id) impure {
+  (int seqno, int pubkey, cell config, cell admins, cell members, cell whitelist, int grams) = load_data();
+  (_, int src_addr) = parse_std_addr(s_addr);
+
+  ;; admin check
+  (slice value, int found) = admins.udict_get?(256, src_addr);
+  ifnot (found) {
+    return return_stake(s_addr, query_id, op);
+  }
+
+  ;; whitelist update
+  cell pubkeys = cs~load_dict();
+  int index = -1;
+  do {
+    (index, slice value, int found) = pubkeys.udict_get_next?(256, index);
+    if (found) {
+      whitelist~udict_set_builder(256, index, begin_cell());
+    }
+  } until (~ found);
+
+  store_data(seqno, pubkey, config, admins, members, whitelist, grams);
+  return send_confirmation(s_addr, 0, op);
+}
+
+() del_whitelist(op, s_addr, cs, query_id) impure {
+  (int seqno, int pubkey, cell config, cell admins, cell members, cell whitelist, int grams) = load_data();
+  (_, int src_addr) = parse_std_addr(s_addr);
+
+  ;; admin check
+  (slice value, int found) = admins.udict_get?(256, src_addr);
+  ifnot (found) {
+    return return_stake(s_addr, query_id, op);
+  }
+
+  ;; whitelist update
+  cell pubkeys = cs~load_dict();
+  int index = -1;
+  do {
+    (index, slice value, int found) = pubkeys.udict_get_next?(256, index);
+    if (found) {
+      whitelist~udict_delete?(256, index);
+    }
+  } until (~ found);
+
+  store_data(seqno, pubkey, config, admins, members, whitelist, grams);
+  return send_confirmation(s_addr, 0, op);
+}
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+  slice cs = in_msg_cell.begin_parse();
+  int flags = cs~load_uint(4);  ;; int_msg_info$0 ihr_disabled:Bool bounce:Bool bounced:Bool
+  if (flags & 1) {
+    ;; ignore all bounced messages
+    return ();
+  }
+
+  var s_addr = cs~load_msg_addr();
+  if (in_msg.slice_empty?()) {
+    return process_transfer(s_addr, msg_value);
+  }
+
+  int op = in_msg~load_uint(32);
+  int query_id = in_msg~load_uint(64);
+  if (op == 0x11111111) {
+    return recover_stake(op, s_addr, query_id);
+  }
+  if (op == 0x22222222) {
+    return send_grams(op, s_addr, in_msg, query_id);
+  }
+  if (op == 0x33333333) {
+    return add_whitelist(op, s_addr, in_msg, query_id);
+  }
+  if (op == 0x44444444) {
+    return del_whitelist(op, s_addr, in_msg, query_id);
+  }
+  ifnot (op & (1 << 31)) {
+    ;; unknown query, return error
+    return send_message_back(s_addr, 0xffffffff, query_id, op, 0, 64);
+  }
+  ;; unknown answer, ignore
+  return ();
+}
+
+() recv_external(slice in_msg) impure {
+  ;; signature check
+  slice signature = in_msg~load_bits(512);
+  slice cs = in_msg;
+
+  ;; load msg and storage
+  int msg_seqno = cs~load_uint(32);
+  (int seqno, int pubkey, cell config, cell admins, cell members, cell whitelist, int grams) = load_data();
+
+  ;; exceptions
+  throw_unless(33, msg_seqno == seqno);
+  throw_unless(34, check_signature(slice_hash(in_msg), signature, pubkey));
+
+  ;; init
+  accept_message();
+  if (seqno == 0) {
+    (cell withdrawals, int pool_open, int pool_lifetime, int destination_wc, int destination_addr,
+    int total_amount, int min_stake, int max_stake) = unpack_config(config);
+    config = pack_config(withdrawals,
+                        now(),
+                        pool_lifetime,
+                        destination_wc,
+                        destination_addr,
+                        total_amount,
+                        min_stake,
+                        max_stake);
+  }
+  store_data(seqno + 1, pubkey, config, admins, members, whitelist, grams);
+}
+
+;; get methods
+int seqno() method_id {
+  return get_data().begin_parse().preload_uint(32);
+}
+
+_ config() method_id {
+  (_, _, cell config, _, _, _, _) = load_data();
+  (_, int pool_open, int pool_lifetime, int destination_wc, int destination_addr,
+  int total_amount, int min_stake, int max_stake) = unpack_config(config);
+
+  return (pool_open, pool_lifetime, destination_wc, destination_addr, total_amount, min_stake, max_stake);
+}
+
+int grams() method_id {
+  return received_grams();
+}
+
+_ admins() method_id {
+  (_, _, _, cell admins, _, _, _) = load_data();
+
+  var result = new_tuple();
+  ifnot (admins.dict_empty?()) {
+    int index = -1;
+    do {
+      (index, slice value, int found) = admins.udict_get_next?(256, index);
+      if (found) {
+        result~append_int(index);
+      }
+    } until (~ found);
+  }
+  return result;
+}
+
+_ whitelist() method_id {
+  (_, _, _, _, _, cell whitelist, _) = load_data();
+
+  var result = new_tuple();
+  ifnot (whitelist.dict_empty?()) {
+    int index = -1;
+    do {
+      (index, slice value, int found) = whitelist.udict_get_next?(256, index);
+      if (found) {
+        result~append_int(index);
+      }
+    } until (~ found);
+  }
+  return result;
+}
+
+_ members() method_id {
+  (_, _, _, _, cell members, _, _) = load_data();
+
+  var result = nil;
+  ifnot (members.dict_empty?()) {
+    int index = -1;
+    do {
+      (index, slice value, int found) = members.udict_get_next?(256, index);
+      if (found) {
+        result = cons(pair(index, value~load_grams()), result);
+      }
+    } until (~ found);
+  }
+  return result;
+}
+
+int member_stake(int wallet_addr) method_id {
+  (_, _, _, _, cell members, _, _) = load_data();
+
+  (slice value, int found) = members.udict_get?(256, wallet_addr);
+  return found ? value~load_grams() : 0;
+}
+
+int timeleft() method_id {
+  (_, _, cell config, _, _, _, _) = load_data();
+  (_, int pool_open, int pool_lifetime, _, _, _, _, _) = unpack_config(config);
+
+  int now = now();
+  return ((pool_open + pool_lifetime) > now) ? (pool_open + pool_lifetime - now) : 0;
+}
+
+_ withdrawals() method_id {
+  (_, _, cell config, _, _, _, _) = load_data();
+  (cell withdrawals, _, _, _, _, _, _, _) = unpack_config(config);
+
+  var result = nil;
+  ifnot (withdrawals.dict_empty?()) {
+    int index = -1;
+    do {
+      (index, slice value, int found) = withdrawals.udict_get_next?(256, index);
+      if (found) {
+        result = cons(pair(index, value~load_grams()), result);
+      }
+    } until (~ found);
+  }
+  return result;
+}

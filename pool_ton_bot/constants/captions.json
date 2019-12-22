@@ -1,0 +1,30 @@
+{
+    "SUCCESS": {
+        "en": "OK",
+        "ru": "OK"
+    },
+    "ERROR": {
+        "en": "An error has occurred.",
+        "ru": "Произошла ошибка."
+    },
+    "POOL": {
+        "en": "{current_page} pool of {last_page}.",
+        "ru": "{current_page} пул из {last_page}."
+    },
+    "LANGUAGE_CHANGED": {
+        "en": "Interface language changed to English.",
+        "ru": "Язык интерфейса изменен на русский."
+    },
+    "LANGUAGE_SELECT": {
+        "en": "Select interface language.",
+        "ru": "Выберите язык интерфейса."
+    },
+    "POOL_DEPOSIT_WAIT": {
+        "en": [
+            "Wait deposit"
+        ],
+        "ru": [
+            "Ожидаем депозит"
+        ]
+    }
+}

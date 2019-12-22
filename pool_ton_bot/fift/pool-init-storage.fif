@@ -1,0 +1,27 @@
+"Asm.fif" include
+// automatically generated from `stdlib.fc` `pool-init-storage.fc` 
+PROGRAM{
+  DECLPROC create_init_storage
+  DECLPROC main
+  create_init_storage PROC:<{
+    //  pubkey config admins members whitelist grams
+    0 PUSHINT	//  pubkey config admins members whitelist grams _7=0
+    NEWC	//  pubkey config admins members whitelist grams _7=0 _8
+    32 STU	//  pubkey config admins members whitelist grams _10
+    s1 s6 XCHG	//  grams config admins members whitelist pubkey _10
+    256 STU	//  grams config admins members whitelist _12
+    s1 s4 XCHG	//  grams whitelist admins members config _12
+    STDICT	//  grams whitelist admins members _13
+    s1 s2 XCHG	//  grams whitelist members admins _13
+    STDICT	//  grams whitelist members _14
+    STDICT	//  grams whitelist _15
+    STDICT	//  grams _16
+    SWAP	//  _16 grams
+    STGRAMS	//  _17
+    ENDC	//  init_storage
+  }>
+  main PROC:<{
+    //  pubkey config admins members whitelist grams
+    create_init_storage CALLDICT	//  _6
+  }>
+}END>c

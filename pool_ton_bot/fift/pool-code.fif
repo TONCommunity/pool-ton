@@ -1,0 +1,867 @@
+"Asm.fif" include
+// automatically generated from `stdlib.fc` `pool-code.fc` 
+PROGRAM{
+  DECLPROC store_data
+  DECLPROC load_data
+  DECLPROC pack_config
+  DECLPROC unpack_config
+  DECLPROC send_message_back
+  DECLPROC return_stake
+  DECLPROC send_confirmation
+  DECLPROC received_grams
+  DECLPROC process_transfer
+  DECLPROC recover_stake
+  DECLPROC send_grams
+  DECLPROC add_whitelist
+  DECLPROC del_whitelist
+  DECLPROC recv_internal
+  DECLPROC recv_external
+  85143 DECLMETHOD seqno
+  103021 DECLMETHOD config
+  85708 DECLMETHOD grams
+  100637 DECLMETHOD admins
+  71793 DECLMETHOD whitelist
+  104769 DECLMETHOD members
+  103533 DECLMETHOD member_stake
+  128387 DECLMETHOD timeleft
+  125021 DECLMETHOD withdrawals
+  store_data PROC:<{
+    //  seqno pubkey config admins members whitelist grams
+    NEWC	//  seqno pubkey config admins members whitelist grams _7
+    s1 s7 XCHG	//  grams pubkey config admins members whitelist seqno _7
+    32 STU	//  grams pubkey config admins members whitelist _9
+    s1 s5 XCHG	//  grams whitelist config admins members pubkey _9
+    256 STU	//  grams whitelist config admins members _11
+    s1 s3 XCHG	//  grams whitelist members admins config _11
+    STDICT	//  grams whitelist members admins _12
+    STDICT	//  grams whitelist members _13
+    STDICT	//  grams whitelist _14
+    STDICT	//  grams _15
+    SWAP	//  _15 grams
+    STGRAMS	//  _16
+    ENDC	//  _17
+    c4 POP
+  }>
+  load_data PROC:<{
+    // 
+    c4 PUSH	//  _1
+    CTOS	//  cs
+    32 LDU	//  _4 cs
+    256 LDU	//  _4 _7 cs
+    LDDICT	//  _4 _7 _10 cs
+    LDDICT	//  _4 _7 _10 _12 cs
+    LDDICT	//  _4 _7 _10 _12 _14 cs
+    LDDICT	//  _4 _7 _10 _12 _14 _16 cs
+    LDGRAMS	//  res res res res res res res cs
+    ENDS
+  }>
+  pack_config PROC:<{
+    //  withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake
+    NEWC	//  withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake _8
+    s1 s8 XCHG	//  max_stake pool_open pool_lifetime destination_wc destination_addr total_amount min_stake withdrawals _8
+    STDICT	//  max_stake pool_open pool_lifetime destination_wc destination_addr total_amount min_stake _9
+    s1 s6 XCHG	//  max_stake min_stake pool_lifetime destination_wc destination_addr total_amount pool_open _9
+    32 STU	//  max_stake min_stake pool_lifetime destination_wc destination_addr total_amount _11
+    s1 s4 XCHG	//  max_stake min_stake total_amount destination_wc destination_addr pool_lifetime _11
+    25 STU	//  max_stake min_stake total_amount destination_wc destination_addr _13
+    s1 s2 XCHG	//  max_stake min_stake total_amount destination_addr destination_wc _13
+    8 STI	//  max_stake min_stake total_amount destination_addr _15
+    256 STU	//  max_stake min_stake total_amount _17
+    SWAP	//  max_stake min_stake _17 total_amount
+    STGRAMS	//  max_stake min_stake _18
+    SWAP	//  max_stake _18 min_stake
+    STGRAMS	//  max_stake _19
+    SWAP	//  _19 max_stake
+    STGRAMS	//  _20
+    ENDC	//  _21
+  }>
+  unpack_config PROC:<{
+    //  config
+    CTOS	//  cs
+    LDDICT	//  _4 cs
+    32 LDU	//  _4 _6 cs
+    25 LDU	//  _4 _6 _9 cs
+    8 LDI	//  _4 _6 _9 _12 cs
+    256 LDU	//  _4 _6 _9 _12 _15 cs
+    LDGRAMS	//  _4 _6 _9 _12 _15 _18 cs
+    LDGRAMS	//  _4 _6 _9 _12 _15 _18 _20 cs
+    LDGRAMS	//  res res res res res res res res cs
+    ENDS
+  }>
+  send_message_back PROC:<{
+    //  addr ans_tag query_id body grams mode
+    0 PUSHINT	//  addr ans_tag query_id body grams mode _7=0
+    24 PUSHINT	//  addr ans_tag query_id body grams mode _7=0 _8=24
+    NEWC	//  addr ans_tag query_id body grams mode _7=0 _8=24 _9
+    6 STU	//  addr ans_tag query_id body grams mode _7=0 _11
+    s0 s7 XCHG2	//  _7=0 ans_tag query_id body grams mode _11 addr
+    STSLICER	//  _7=0 ans_tag query_id body grams mode _12
+    ROT	//  _7=0 ans_tag query_id body mode _12 grams
+    STGRAMS	//  _7=0 ans_tag query_id body mode _13
+    s1 s5 XCHG	//  mode ans_tag query_id body _7=0 _13
+    107 STU	//  mode ans_tag query_id body _27
+    s1 s3 XCHG	//  mode body query_id ans_tag _27
+    32 STU	//  mode body query_id _29
+    64 STU	//  mode body msg
+    OVER	//  mode body msg body
+    -1 GTINT	//  mode body msg _33
+    IF:<{	//  mode body msg
+      32 STU	//  mode msg
+    }>ELSE<{
+      NIP	//  mode msg
+    }>
+    ENDC	//  mode _37
+    SWAP	//  _37 mode
+    SENDRAWMSG
+  }>
+  return_stake PROC:<{
+    //  addr query_id reason
+    4000269644 PUSHINT	//  addr query_id reason _3=4000269644
+    0 PUSHINT	//  addr query_id reason _3=4000269644 _4=0
+    s3 s3 s0 XCHG3
+    64 PUSHINT	//  addr _3=4000269644 query_id reason _4=0 _5=64
+    send_message_back CALLDICT
+  }>
+  send_confirmation PROC:<{
+    //  addr query_id comment
+    4084484172 PUSHINT	//  addr query_id comment _3=4084484172
+    1000000000 PUSHINT	//  addr query_id comment _3=4084484172 _4=1000000000
+    s3 s3 s0 XCHG3
+    3 PUSHINT	//  addr _3=4084484172 query_id comment _4=1000000000 _5=3
+    send_message_back CALLDICT
+  }>
+  received_grams PROC:<{
+    // 
+    load_data CALLDICT	//  _21 _22 _23 _24 _25 _26 _27
+    s2 s6 XCHG
+    6 BLKDROP	//  members
+    0 PUSHINT	//  members result=0
+    OVER	//  members result=0 members
+    DICTEMPTY	//  members result=0 _10
+    IFNOT:<{	//  members result=0
+      -1 PUSHINT	//  members result=0 index=-1
+      UNTIL:<{
+        s2 PUSH
+        8 PUSHPOW2	//  members result index members _15=256
+        DICTUGETNEXT
+        NULLSWAPIFNOT
+        NULLSWAPIFNOT	//  members result value index found
+        DUP	//  members result value index found found
+        IF:<{	//  members result value index found
+          s0 s2 XCHG	//  members result found index value
+          LDGRAMS	//  members result found index _32 _31
+          DROP	//  members result found index _17
+          s1 s3 XCHG	//  members index found result _17
+          ADD	//  members index found result
+        }>ELSE<{
+          2SWAP
+          DROP	//  members index found result
+        }>
+        SWAP	//  members index result found
+        NOT	//  members index result _20
+        s1 s2 XCHG	//  members result index _20
+      }>	//  members result index
+      DROP
+      NIP	//  result
+    }>ELSE<{
+      NIP	//  result
+    }>
+  }>
+  process_transfer PROC:<{
+    //  s_addr msg_value
+    load_data CALLDICT	//  s_addr msg_value seqno pubkey config admins members whitelist grams
+    s4 PUSH	//  s_addr msg_value seqno pubkey config admins members whitelist grams config
+    unpack_config CALLDICT	//  s_addr msg_value seqno pubkey config admins members whitelist grams _86 _87 _88 _89 _90 _91 _92 _93
+    s2 POP
+    s6 POP	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake pool_open pool_lifetime destination_wc destination_addr max_stake
+    s14 PUSH	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake pool_open pool_lifetime destination_wc destination_addr max_stake s_addr
+    REWRITESTDADDR	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake pool_open pool_lifetime destination_wc destination_addr max_stake src_wc src_addr
+    s0 s4 XCHG	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake pool_open pool_lifetime src_addr destination_addr max_stake src_wc destination_wc
+    EQUAL	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake pool_open pool_lifetime src_addr destination_addr max_stake _22
+    s3 s2 PUXC	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake pool_open pool_lifetime src_addr _22 max_stake src_addr destination_addr
+    EQUAL	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake pool_open pool_lifetime src_addr _22 max_stake _23
+    s1 s2 XCHG	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake pool_open pool_lifetime src_addr max_stake _22 _23
+    AND	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake pool_open pool_lifetime src_addr max_stake _24
+    IFJMP:<{	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake pool_open pool_lifetime src_addr max_stake
+      5 BLKDROP
+      s8 POP	//  grams msg_value seqno pubkey config admins members whitelist
+      s7 s6 XCHG2	//  members whitelist seqno pubkey config admins grams msg_value
+      ADD	//  members whitelist seqno pubkey config admins grams
+      s4 s6 XCHG
+      s3 s5 XCHG
+      s4 s3 s0 XCHG3	//  seqno pubkey config admins members whitelist grams
+      store_data CALLDICT
+    }>	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake pool_open pool_lifetime src_addr max_stake
+    NOW	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake pool_open pool_lifetime src_addr max_stake _27
+    s4 s3 XCHG2	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake max_stake _27 src_addr pool_open pool_lifetime
+    ADD	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake max_stake _27 src_addr _28
+    s1 s2 XCHG	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake max_stake src_addr _27 _28
+    GREATER	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake max_stake src_addr _29
+    IFJMP:<{	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake max_stake src_addr
+      11 BLKDROP	//  s_addr
+      0 PUSHINT	//  s_addr _30=0
+      DUP	//  s_addr _30=0 _31=0
+      return_stake CALLDICT
+    }>	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake max_stake src_addr
+    -1 PUSHINT	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake max_stake src_addr whitelisted=-1
+    s5 PUSH	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake max_stake src_addr whitelisted=-1 whitelist
+    DICTEMPTY	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake max_stake src_addr whitelisted=-1 _35
+    IFNOT:<{	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake max_stake src_addr whitelisted=-1
+      DROP	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake max_stake src_addr
+      s0 s4 PUSH2
+      8 PUSHPOW2	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake max_stake src_addr src_addr whitelist _37=256
+      DICTUGET
+      NULLSWAPIFNOT	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake max_stake src_addr _96 _97
+      NIP	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake max_stake src_addr whitelisted
+    }>	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake max_stake src_addr whitelisted
+    IFNOTJMP:<{	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake max_stake src_addr
+      11 BLKDROP	//  s_addr
+      0 PUSHINT	//  s_addr _39=0
+      1 PUSHINT	//  s_addr _39=0 _40=1
+      return_stake CALLDICT
+    }>	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake max_stake src_addr
+    0 PUSHINT	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake max_stake src_addr member_stake=0
+    s1 s6 PUSH2
+    8 PUSHPOW2	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake max_stake src_addr member_stake=0 src_addr members _46=256
+    DICTUGET
+    NULLSWAPIFNOT	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake max_stake src_addr member_stake=0 value found
+    IF:<{	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake max_stake src_addr member_stake=0 value
+      NIP	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake max_stake src_addr value
+      LDGRAMS	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake max_stake src_addr _101 _100
+      DROP	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake max_stake src_addr member_stake
+    }>ELSE<{
+      DROP	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake max_stake src_addr member_stake
+    }>
+    s0 s11 PUSH2	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake max_stake src_addr member_stake member_stake msg_value
+    ADD	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake max_stake src_addr member_stake _50
+    1000000000 PUSHINT	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake max_stake src_addr member_stake _50 _51=1000000000
+    SUB	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake max_stake src_addr member_stake _52
+    s0 s3 XCHG2	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake member_stake src_addr _52 max_stake
+    GREATER	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake member_stake src_addr _53
+    IFJMP:<{	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake member_stake src_addr
+      11 BLKDROP	//  s_addr
+      0 PUSHINT	//  s_addr _54=0
+      2 PUSHINT	//  s_addr _54=0 _55=2
+      return_stake CALLDICT
+    }>	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake member_stake src_addr
+    s10 PUSH
+    1000000000 PUSHINT	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake member_stake src_addr msg_value _57=1000000000
+    SUB	//  s_addr msg_value seqno pubkey config admins members whitelist grams min_stake member_stake src_addr _58
+    s0 s3 XCHG2	//  s_addr msg_value seqno pubkey config admins members whitelist grams src_addr member_stake _58 min_stake
+    LESS	//  s_addr msg_value seqno pubkey config admins members whitelist grams src_addr member_stake _59
+    IFJMP:<{	//  s_addr msg_value seqno pubkey config admins members whitelist grams src_addr member_stake
+      10 BLKDROP	//  s_addr
+      0 PUSHINT	//  s_addr _60=0
+      3 PUSHINT	//  s_addr _60=0 _61=3
+      return_stake CALLDICT
+    }>	//  s_addr msg_value seqno pubkey config admins members whitelist grams src_addr member_stake
+    s0 s9 XCHG
+    1000000000 PUSHINT	//  s_addr member_stake seqno pubkey config admins members whitelist grams src_addr msg_value _63=1000000000
+    SUB	//  s_addr member_stake seqno pubkey config admins members whitelist grams src_addr msg_value
+    DUP	//  s_addr member_stake seqno pubkey config admins members whitelist grams src_addr msg_value msg_value
+    44 THROWIFNOT
+    ACCEPT
+    s9 s9 XCPU	//  s_addr msg_value seqno pubkey config admins members whitelist grams src_addr member_stake msg_value
+    ADD	//  s_addr msg_value seqno pubkey config admins members whitelist grams src_addr member_stake
+    s2 s9 XCHG2	//  s_addr member_stake seqno pubkey config admins members whitelist src_addr grams msg_value
+    ADD	//  s_addr member_stake seqno pubkey config admins members whitelist src_addr grams
+    NEWC	//  s_addr member_stake seqno pubkey config admins members whitelist src_addr grams _71
+    s0 s9 XCHG2	//  s_addr grams seqno pubkey config admins members whitelist src_addr _71 member_stake
+    STGRAMS	//  s_addr grams seqno pubkey config admins members whitelist src_addr _72
+    s0 s1 s3 XCHG3
+    8 PUSHPOW2	//  s_addr grams seqno pubkey config admins whitelist _72 src_addr members _73=256
+    DICTUSETB	//  s_addr grams seqno pubkey config admins whitelist members
+    s5 s6 XCHG
+    s4 s5 XCHG
+    s3 s4 XCHG
+    s0 s1 s3 XCHG3	//  s_addr seqno pubkey config admins members whitelist grams
+    store_data CALLDICT
+    0 PUSHINT	//  s_addr _76=0
+    DUP	//  s_addr _76=0 _77=0
+    send_confirmation CALLDICT
+  }>
+  recover_stake PROC:<{
+    //  op s_addr query_id
+    load_data CALLDICT	//  op s_addr query_id seqno pubkey config admins members whitelist grams
+    s0 s4 XCHG	//  op s_addr query_id seqno pubkey grams admins members whitelist config
+    unpack_config CALLDICT	//  op s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake
+    NOW	//  op s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake _20
+    s7 s6 PUSH2	//  op s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake _20 pool_open pool_lifetime
+    ADD	//  op s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake _20 _21
+    LEQ	//  op s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake _22
+    IFJMP:<{	//  op s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake
+      12 BLKDROP
+      2DROP	//  op s_addr query_id
+      ROT	//  s_addr query_id op
+      return_stake CALLDICT
+    }>	//  op s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake
+    s15 PUSH	//  op s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake s_addr
+    REWRITESTDADDR	//  op s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake _102 _103
+    NIP	//  op s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake src_addr
+    s0 s10 PUSH2
+    8 PUSHPOW2	//  op s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake src_addr src_addr members _29=256
+    DICTUGET
+    NULLSWAPIFNOT	//  op s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake src_addr value found
+    IFNOTJMP:<{	//  op s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake src_addr value
+      12 BLKDROP
+      4 BLKDROP	//  op s_addr query_id
+      ROT	//  s_addr query_id op
+      return_stake CALLDICT
+    }>	//  op s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake src_addr value
+    s1 s9 PUSH2
+    8 PUSHPOW2	//  op s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake src_addr value src_addr withdrawals _34=256
+    DICTUGET
+    NULLSWAPIFNOT	//  op s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake src_addr value _106 _107
+    NIP	//  op s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake src_addr value found
+    IFJMP:<{	//  op s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake src_addr value
+      12 BLKDROP
+      4 BLKDROP	//  op s_addr query_id
+      ROT	//  s_addr query_id op
+      return_stake CALLDICT
+    }>	//  op s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake src_addr value
+    18 s() POP	//  value s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake src_addr
+    s0 17 s() XCHG	//  src_addr s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake value
+    LDGRAMS	//  src_addr s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake _109 _108
+    DROP	//  src_addr s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake member_stake
+    received_grams CALLDICT	//  src_addr s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake member_stake received_grams
+    OVER
+    10000 PUSHINT	//  src_addr s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake member_stake received_grams member_stake _43=10000
+    MUL	//  src_addr s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake member_stake received_grams _44
+    OVER	//  src_addr s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake member_stake received_grams _44 received_grams
+    DIV	//  src_addr s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake member_stake received_grams part
+    s14 PUSH	//  src_addr s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake member_stake received_grams part grams
+    MUL	//  src_addr s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake member_stake received_grams _47
+    10000 PUSHINT	//  src_addr s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake member_stake received_grams _47 _48=10000
+    DIV	//  src_addr s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake member_stake received_grams amount
+    s1 s14 XCPU	//  src_addr s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake member_stake amount received_grams grams
+    EQUAL	//  src_addr s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake member_stake amount _50
+    IF:<{	//  src_addr s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake member_stake amount
+      DROP	//  src_addr s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake amount
+    }>ELSE<{
+      NIP	//  src_addr s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake amount
+    }>
+    NEWC	//  src_addr s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake amount _52
+    OVER	//  src_addr s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake amount _52 amount
+    STGRAMS	//  src_addr s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake amount _53
+    s0 s2 XCHG
+    s1 18 s() XCHG
+    s0 s9 XCHG
+    8 PUSHPOW2	//  amount s_addr query_id seqno pubkey grams admins members whitelist max_stake pool_open pool_lifetime destination_wc destination_addr total_amount min_stake _53 src_addr withdrawals _54=256
+    DICTUSETB	//  amount s_addr query_id seqno pubkey grams admins members whitelist max_stake pool_open pool_lifetime destination_wc destination_addr total_amount min_stake withdrawals
+    s0 s7 XCHG	//  amount s_addr query_id seqno pubkey grams admins members whitelist withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake
+    pack_config CALLDICT	//  amount s_addr query_id seqno pubkey grams admins members whitelist config
+    s0 s4 XCHG	//  amount s_addr query_id seqno pubkey config admins members whitelist grams
+    store_data CALLDICT
+    4184830756 PUSHINT	//  amount s_addr query_id _58=4184830756
+    0 PUSHINT	//  amount s_addr query_id _58=4184830756 _59=0
+    24 PUSHINT	//  amount s_addr query_id _58=4184830756 _59=0 _60=24
+    NEWC	//  amount s_addr query_id _58=4184830756 _59=0 _60=24 _61
+    6 STU	//  amount s_addr query_id _58=4184830756 _59=0 _63
+    s0 s4 XCHG2	//  amount _59=0 query_id _58=4184830756 _63 s_addr
+    STSLICER	//  amount _59=0 query_id _58=4184830756 _64
+    s0 s4 XCHG2	//  _58=4184830756 _59=0 query_id _64 amount
+    STGRAMS	//  _58=4184830756 _59=0 query_id _65
+    s1 s2 XCHG	//  _58=4184830756 query_id _59=0 _65
+    107 STU	//  _58=4184830756 query_id _79
+    s1 s2 XCHG	//  query_id _58=4184830756 _79
+    32 STU	//  query_id _81
+    64 STU	//  _83
+    ENDC	//  _84
+    64 PUSHINT	//  _84 _85=64
+    SENDRAWMSG
+  }>
+  send_grams PROC:<{
+    //  op s_addr cs query_id
+    load_data CALLDICT	//  op s_addr cs query_id seqno pubkey config admins members whitelist grams
+    s9 PUSH	//  op s_addr cs query_id seqno pubkey config admins members whitelist grams s_addr
+    REWRITESTDADDR	//  op s_addr cs query_id seqno pubkey config admins members whitelist grams _85 _86
+    NIP	//  op s_addr cs query_id seqno pubkey config admins members whitelist grams src_addr
+    s4 PUSH
+    8 PUSHPOW2	//  op s_addr cs query_id seqno pubkey config admins members whitelist grams src_addr admins _17=256
+    DICTUGET
+    NULLSWAPIFNOT	//  op s_addr cs query_id seqno pubkey config admins members whitelist grams _87 _88
+    NIP	//  op s_addr cs query_id seqno pubkey config admins members whitelist grams found
+    IFNOTJMP:<{	//  op s_addr cs query_id seqno pubkey config admins members whitelist grams
+      s7 s8 XCHG
+      8 BLKDROP	//  op s_addr query_id
+      ROT	//  s_addr query_id op
+      return_stake CALLDICT
+    }>	//  op s_addr cs query_id seqno pubkey config admins members whitelist grams
+    s0 s8 XCHG	//  op s_addr grams query_id seqno pubkey config admins members whitelist cs
+    LDMSGADDR	//  op s_addr grams query_id seqno pubkey config admins members whitelist _90 _89
+    DROP	//  op s_addr grams query_id seqno pubkey config admins members whitelist msg_addr
+    DUP	//  op s_addr grams query_id seqno pubkey config admins members whitelist msg_addr msg_addr
+    REWRITESTDADDR	//  op s_addr grams query_id seqno pubkey config admins members whitelist msg_addr msg_destination_wc msg_destination_addr
+    s0 s6 XCHG	//  op s_addr grams query_id seqno pubkey msg_destination_addr admins members whitelist msg_addr msg_destination_wc config
+    unpack_config CALLDICT	//  op s_addr grams query_id seqno pubkey msg_destination_addr admins members whitelist msg_addr msg_destination_wc withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake
+    s3 PUSH	//  op s_addr grams query_id seqno pubkey msg_destination_addr admins members whitelist msg_addr msg_destination_wc withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake destination_addr
+    0 NEQINT	//  op s_addr grams query_id seqno pubkey msg_destination_addr admins members whitelist msg_addr msg_destination_wc withdrawals pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake _36
+    s14 s4 PUXC	//  op s_addr grams query_id seqno pubkey msg_destination_addr admins members whitelist msg_addr msg_destination_wc withdrawals pool_open pool_lifetime destination_wc _36 total_amount min_stake max_stake msg_destination_addr destination_addr
+    NEQ	//  op s_addr grams query_id seqno pubkey msg_destination_addr admins members whitelist msg_addr msg_destination_wc withdrawals pool_open pool_lifetime destination_wc _36 total_amount min_stake max_stake _37
+    s1 s4 XCHG	//  op s_addr grams query_id seqno pubkey msg_destination_addr admins members whitelist msg_addr msg_destination_wc withdrawals pool_open pool_lifetime destination_wc max_stake total_amount min_stake _36 _37
+    AND	//  op s_addr grams query_id seqno pubkey msg_destination_addr admins members whitelist msg_addr msg_destination_wc withdrawals pool_open pool_lifetime destination_wc max_stake total_amount min_stake _38
+    s8 s4 PUXC	//  op s_addr grams query_id seqno pubkey msg_destination_addr admins members whitelist msg_addr msg_destination_wc withdrawals pool_open pool_lifetime _38 max_stake total_amount min_stake msg_destination_wc destination_wc
+    NEQ	//  op s_addr grams query_id seqno pubkey msg_destination_addr admins members whitelist msg_addr msg_destination_wc withdrawals pool_open pool_lifetime _38 max_stake total_amount min_stake _39
+    s1 s4 XCHG	//  op s_addr grams query_id seqno pubkey msg_destination_addr admins members whitelist msg_addr msg_destination_wc withdrawals pool_open pool_lifetime min_stake max_stake total_amount _38 _39
+    AND	//  op s_addr grams query_id seqno pubkey msg_destination_addr admins members whitelist msg_addr msg_destination_wc withdrawals pool_open pool_lifetime min_stake max_stake total_amount _40
+    IFJMP:<{	//  op s_addr grams query_id seqno pubkey msg_destination_addr admins members whitelist msg_addr msg_destination_wc withdrawals pool_open pool_lifetime min_stake max_stake total_amount
+      12 BLKDROP
+      s2 s3 XCHG
+      3 BLKDROP	//  op s_addr query_id
+      ROT	//  s_addr query_id op
+      return_stake CALLDICT
+    }>	//  op s_addr grams query_id seqno pubkey msg_destination_addr admins members whitelist msg_addr msg_destination_wc withdrawals pool_open pool_lifetime min_stake max_stake total_amount
+    s15 s0 PUSH2	//  op s_addr grams query_id seqno pubkey msg_destination_addr admins members whitelist msg_addr msg_destination_wc withdrawals pool_open pool_lifetime min_stake max_stake total_amount grams total_amount
+    LESS	//  op s_addr grams query_id seqno pubkey msg_destination_addr admins members whitelist msg_addr msg_destination_wc withdrawals pool_open pool_lifetime min_stake max_stake total_amount _42
+    IFJMP:<{	//  op s_addr grams query_id seqno pubkey msg_destination_addr admins members whitelist msg_addr msg_destination_wc withdrawals pool_open pool_lifetime min_stake max_stake total_amount
+      12 BLKDROP
+      s2 s3 XCHG
+      3 BLKDROP	//  op s_addr query_id
+      ROT	//  s_addr query_id op
+      return_stake CALLDICT
+    }>	//  op s_addr grams query_id seqno pubkey msg_destination_addr admins members whitelist msg_addr msg_destination_wc withdrawals pool_open pool_lifetime min_stake max_stake total_amount
+    s5 s7 XCHG
+    s4 s6 XCHG
+    s3 s5 XCHG
+    s3 s11 XCHG
+    -ROT	//  op s_addr grams query_id seqno pubkey msg_addr admins members whitelist withdrawals pool_open pool_lifetime msg_destination_wc msg_destination_addr total_amount min_stake max_stake
+    pack_config CALLDICT	//  op s_addr grams query_id seqno pubkey msg_addr admins members whitelist config
+    s5 s6 XCHG
+    s4 s6 XCHG
+    3 -ROLL
+    0 PUSHINT	//  op s_addr grams query_id msg_addr seqno pubkey config admins members whitelist _45=0
+    store_data CALLDICT
+    s1 s3 XCHG
+    0 PUSHINT
+    s0 s5 XCHG2	//  msg_addr query_id grams s_addr _47=0 op
+    send_confirmation CALLDICT
+    4184830756 PUSHINT	//  msg_addr query_id grams _49=4184830756
+    0 PUSHINT	//  msg_addr query_id grams _49=4184830756 _50=0
+    24 PUSHINT	//  msg_addr query_id grams _49=4184830756 _50=0 _51=24
+    NEWC	//  msg_addr query_id grams _49=4184830756 _50=0 _51=24 _52
+    6 STU	//  msg_addr query_id grams _49=4184830756 _50=0 _54
+    s0 s5 XCHG2	//  _50=0 query_id grams _49=4184830756 _54 msg_addr
+    STSLICER	//  _50=0 query_id grams _49=4184830756 _55
+    ROT	//  _50=0 query_id _49=4184830756 _55 grams
+    STGRAMS	//  _50=0 query_id _49=4184830756 _56
+    s1 s3 XCHG	//  _49=4184830756 query_id _50=0 _56
+    107 STU	//  _49=4184830756 query_id _70
+    s1 s2 XCHG	//  query_id _49=4184830756 _70
+    32 STU	//  query_id _72
+    64 STU	//  _74
+    ENDC	//  _75
+    3 PUSHINT	//  _75 _76=3
+    SENDRAWMSG
+  }>
+  add_whitelist PROC:<{
+    //  op s_addr cs query_id
+    load_data CALLDICT	//  op s_addr cs query_id seqno pubkey config admins members whitelist grams
+    s9 PUSH	//  op s_addr cs query_id seqno pubkey config admins members whitelist grams s_addr
+    REWRITESTDADDR	//  op s_addr cs query_id seqno pubkey config admins members whitelist grams _44 _45
+    NIP	//  op s_addr cs query_id seqno pubkey config admins members whitelist grams src_addr
+    s4 PUSH
+    8 PUSHPOW2	//  op s_addr cs query_id seqno pubkey config admins members whitelist grams src_addr admins _17=256
+    DICTUGET
+    NULLSWAPIFNOT	//  op s_addr cs query_id seqno pubkey config admins members whitelist grams _46 _47
+    NIP	//  op s_addr cs query_id seqno pubkey config admins members whitelist grams found
+    IFNOTJMP:<{	//  op s_addr cs query_id seqno pubkey config admins members whitelist grams
+      s7 s8 XCHG
+      8 BLKDROP	//  op s_addr query_id
+      ROT	//  s_addr query_id op
+      return_stake CALLDICT
+    }>	//  op s_addr cs query_id seqno pubkey config admins members whitelist grams
+    s7 POP	//  op s_addr cs grams seqno pubkey config admins members whitelist
+    s0 s7 XCHG	//  op s_addr whitelist grams seqno pubkey config admins members cs
+    LDDICT	//  op s_addr whitelist grams seqno pubkey config admins members _49 _48
+    DROP	//  op s_addr whitelist grams seqno pubkey config admins members pubkeys
+    -1 PUSHINT	//  op s_addr whitelist grams seqno pubkey config admins members pubkeys index=-1
+    UNTIL:<{
+      OVER
+      8 PUSHPOW2	//  op s_addr whitelist grams seqno pubkey config admins members pubkeys index pubkeys _27=256
+      DICTUGETNEXT
+      NULLSWAPIFNOT
+      NULLSWAPIFNOT	//  op s_addr whitelist grams seqno pubkey config admins members pubkeys _51 _50 _52
+      s2 POP	//  op s_addr whitelist grams seqno pubkey config admins members pubkeys found index
+      OVER	//  op s_addr whitelist grams seqno pubkey config admins members pubkeys found index found
+      IF:<{	//  op s_addr whitelist grams seqno pubkey config admins members pubkeys found index
+        NEWC	//  op s_addr whitelist grams seqno pubkey config admins members pubkeys found index _30
+        SWAP
+        8 PUSHPOW2
+        s1 s11 s11 PUXC2	//  op s_addr index grams seqno pubkey config admins members pubkeys found _30 index whitelist _31=256
+        DICTUSETB	//  op s_addr index grams seqno pubkey config admins members pubkeys found whitelist
+      }>ELSE<{
+        s0 s9 XCHG	//  op s_addr index grams seqno pubkey config admins members pubkeys found whitelist
+      }>
+      SWAP	//  op s_addr index grams seqno pubkey config admins members pubkeys whitelist found
+      NOT	//  op s_addr index grams seqno pubkey config admins members pubkeys whitelist _33
+      s1 s9 XCHG	//  op s_addr whitelist grams seqno pubkey config admins members pubkeys index _33
+    }>	//  op s_addr whitelist grams seqno pubkey config admins members pubkeys index
+    2DROP	//  op s_addr whitelist grams seqno pubkey config admins members
+    2 5 BLKSWAP	//  op s_addr seqno pubkey config admins members whitelist grams
+    store_data CALLDICT
+    SWAP
+    0 PUSHINT
+    SWAP	//  s_addr _35=0 op
+    send_confirmation CALLDICT
+  }>
+  del_whitelist PROC:<{
+    //  op s_addr cs query_id
+    load_data CALLDICT	//  op s_addr cs query_id seqno pubkey config admins members whitelist grams
+    s9 PUSH	//  op s_addr cs query_id seqno pubkey config admins members whitelist grams s_addr
+    REWRITESTDADDR	//  op s_addr cs query_id seqno pubkey config admins members whitelist grams _43 _44
+    NIP	//  op s_addr cs query_id seqno pubkey config admins members whitelist grams src_addr
+    s4 PUSH
+    8 PUSHPOW2	//  op s_addr cs query_id seqno pubkey config admins members whitelist grams src_addr admins _17=256
+    DICTUGET
+    NULLSWAPIFNOT	//  op s_addr cs query_id seqno pubkey config admins members whitelist grams _45 _46
+    NIP	//  op s_addr cs query_id seqno pubkey config admins members whitelist grams found
+    IFNOTJMP:<{	//  op s_addr cs query_id seqno pubkey config admins members whitelist grams
+      s7 s8 XCHG
+      8 BLKDROP	//  op s_addr query_id
+      ROT	//  s_addr query_id op
+      return_stake CALLDICT
+    }>	//  op s_addr cs query_id seqno pubkey config admins members whitelist grams
+    s7 POP	//  op s_addr cs grams seqno pubkey config admins members whitelist
+    s0 s7 XCHG	//  op s_addr whitelist grams seqno pubkey config admins members cs
+    LDDICT	//  op s_addr whitelist grams seqno pubkey config admins members _48 _47
+    DROP	//  op s_addr whitelist grams seqno pubkey config admins members pubkeys
+    -1 PUSHINT	//  op s_addr whitelist grams seqno pubkey config admins members pubkeys index=-1
+    UNTIL:<{
+      OVER
+      8 PUSHPOW2	//  op s_addr whitelist grams seqno pubkey config admins members pubkeys index pubkeys _27=256
+      DICTUGETNEXT
+      NULLSWAPIFNOT
+      NULLSWAPIFNOT	//  op s_addr whitelist grams seqno pubkey config admins members pubkeys _50 _49 _51
+      s2 POP	//  op s_addr whitelist grams seqno pubkey config admins members pubkeys found index
+      OVER	//  op s_addr whitelist grams seqno pubkey config admins members pubkeys found index found
+      IF:<{	//  op s_addr whitelist grams seqno pubkey config admins members pubkeys found index
+        8 PUSHPOW2	//  op s_addr whitelist grams seqno pubkey config admins members pubkeys found index _30=256
+        s1 s10 s10 PUXC2	//  op s_addr index grams seqno pubkey config admins members pubkeys found index whitelist _30=256
+        DICTUDEL	//  op s_addr index grams seqno pubkey config admins members pubkeys found _52 _53
+        DROP	//  op s_addr index grams seqno pubkey config admins members pubkeys found whitelist
+      }>ELSE<{
+        s0 s9 XCHG	//  op s_addr index grams seqno pubkey config admins members pubkeys found whitelist
+      }>
+      SWAP	//  op s_addr index grams seqno pubkey config admins members pubkeys whitelist found
+      NOT	//  op s_addr index grams seqno pubkey config admins members pubkeys whitelist _32
+      s1 s9 XCHG	//  op s_addr whitelist grams seqno pubkey config admins members pubkeys index _32
+    }>	//  op s_addr whitelist grams seqno pubkey config admins members pubkeys index
+    2DROP	//  op s_addr whitelist grams seqno pubkey config admins members
+    2 5 BLKSWAP	//  op s_addr seqno pubkey config admins members whitelist grams
+    store_data CALLDICT
+    SWAP
+    0 PUSHINT
+    SWAP	//  s_addr _34=0 op
+    send_confirmation CALLDICT
+  }>
+  recv_internal PROC:<{
+    //  msg_value in_msg_cell in_msg
+    SWAP	//  msg_value in_msg in_msg_cell
+    CTOS	//  msg_value in_msg cs
+    4 LDU	//  msg_value in_msg flags cs
+    SWAP
+    1 PUSHINT	//  msg_value in_msg cs flags _9=1
+    AND	//  msg_value in_msg cs _10
+    IFJMP:<{	//  msg_value in_msg cs
+      3 BLKDROP	// 
+    }>	//  msg_value in_msg cs
+    LDMSGADDR	//  msg_value in_msg _47 _46
+    DROP	//  msg_value in_msg s_addr
+    OVER	//  msg_value in_msg s_addr in_msg
+    SEMPTY	//  msg_value in_msg s_addr _14
+    IFJMP:<{	//  msg_value in_msg s_addr
+      NIP	//  msg_value s_addr
+      SWAP	//  s_addr msg_value
+      process_transfer CALLDICT
+    }>	//  msg_value in_msg s_addr
+    s2 POP	//  s_addr in_msg
+    32 LDU	//  s_addr op in_msg
+    64 LDU	//  s_addr op query_id in_msg
+    s2 PUSH
+    286331153 PUSHINT	//  s_addr op query_id in_msg op _24=286331153
+    EQUAL	//  s_addr op query_id in_msg _25
+    IFJMP:<{	//  s_addr op query_id in_msg
+      DROP	//  s_addr op query_id
+      s1 s2 XCHG	//  op s_addr query_id
+      recover_stake CALLDICT
+    }>	//  s_addr op query_id in_msg
+    s2 PUSH
+    572662306 PUSHINT	//  s_addr op query_id in_msg op _27=572662306
+    EQUAL	//  s_addr op query_id in_msg _28
+    IFJMP:<{	//  s_addr op query_id in_msg
+      s2 s3 XCHG
+      SWAP	//  op s_addr in_msg query_id
+      send_grams CALLDICT
+    }>	//  s_addr op query_id in_msg
+    s2 PUSH
+    858993459 PUSHINT	//  s_addr op query_id in_msg op _30=858993459
+    EQUAL	//  s_addr op query_id in_msg _31
+    IFJMP:<{	//  s_addr op query_id in_msg
+      s2 s3 XCHG
+      SWAP	//  op s_addr in_msg query_id
+      add_whitelist CALLDICT
+    }>	//  s_addr op query_id in_msg
+    s2 PUSH
+    1145324612 PUSHINT	//  s_addr op query_id in_msg op _33=1145324612
+    EQUAL	//  s_addr op query_id in_msg _34
+    IFJMP:<{	//  s_addr op query_id in_msg
+      s2 s3 XCHG
+      SWAP	//  op s_addr in_msg query_id
+      del_whitelist CALLDICT
+    }>	//  s_addr op query_id in_msg
+    DROP	//  s_addr op query_id
+    OVER
+    31 PUSHPOW2	//  s_addr op query_id op _38
+    AND	//  s_addr op query_id _39
+    IFNOTJMP:<{	//  s_addr op query_id
+      32 PUSHPOW2DEC	//  s_addr op query_id _40=4294967295
+      0 PUSHINT	//  s_addr op query_id _40=4294967295 _41=0
+      s1 s3 XCHG
+      64 PUSHINT	//  s_addr _40=4294967295 query_id op _41=0 _42=64
+      send_message_back CALLDICT
+    }>	//  s_addr op query_id
+    3 BLKDROP	// 
+  }>
+  recv_external PROC:<{
+    //  in_msg
+    9 PUSHPOW2	//  in_msg _3=512
+    LDSLICEX	//  signature in_msg
+    DUP	//  signature in_msg cs
+    32 LDU	//  signature in_msg _45 _44
+    DROP	//  signature in_msg msg_seqno
+    load_data CALLDICT	//  signature in_msg msg_seqno seqno pubkey config admins members whitelist grams
+    s7 s6 XCPU	//  signature in_msg grams seqno pubkey config admins members whitelist msg_seqno seqno
+    EQUAL	//  signature in_msg grams seqno pubkey config admins members whitelist _19
+    33 THROWIFNOT
+    s0 s7 XCHG	//  signature whitelist grams seqno pubkey config admins members in_msg
+    HASHSU	//  signature whitelist grams seqno pubkey config admins members _22
+    s0 s8 s4 XC2PU	//  members whitelist grams seqno pubkey config admins _22 signature pubkey
+    CHKSIGNU	//  members whitelist grams seqno pubkey config admins _23
+    34 THROWIFNOT
+    ACCEPT
+    s3 PUSH	//  members whitelist grams seqno pubkey config admins seqno
+    0 EQINT	//  members whitelist grams seqno pubkey config admins _27
+    IF:<{	//  members whitelist grams seqno pubkey config admins
+      SWAP	//  members whitelist grams seqno pubkey admins config
+      unpack_config CALLDICT	//  members whitelist grams seqno pubkey admins _53 _54 _55 _56 _57 _58 _59 _60
+      s6 POP	//  members whitelist grams seqno pubkey admins withdrawals max_stake pool_lifetime destination_wc destination_addr total_amount min_stake
+      NOW	//  members whitelist grams seqno pubkey admins withdrawals max_stake pool_lifetime destination_wc destination_addr total_amount min_stake _37
+      s0 s6 XCHG	//  members whitelist grams seqno pubkey admins withdrawals _37 pool_lifetime destination_wc destination_addr total_amount min_stake max_stake
+      pack_config CALLDICT	//  members whitelist grams seqno pubkey admins config
+    }>ELSE<{
+      SWAP	//  members whitelist grams seqno pubkey admins config
+    }>
+    s0 s3 XCHG	//  members whitelist grams config pubkey admins seqno
+    INC	//  members whitelist grams config pubkey admins _40
+    s5 s1 s6 XCHG3
+    s3 s4 XCHG
+    s0 s0 s3 XCHG3	//  _40 pubkey config admins members whitelist grams
+    store_data CALLDICT
+  }>
+  seqno PROC:<{
+    // 
+    c4 PUSH	//  _0
+    CTOS	//  _1
+    32 PLDU	//  _3
+  }>
+  config PROC:<{
+    // 
+    load_data CALLDICT	//  _17 _18 _19 _20 _21 _22 _23
+    s4 s6 XCHG
+    6 BLKDROP	//  config
+    unpack_config CALLDICT	//  _24 _25 _26 _27 _28 _29 _30 _31
+    s7 POP	//  max_stake pool_open pool_lifetime destination_wc destination_addr total_amount min_stake
+    6 ROLL	//  pool_open pool_lifetime destination_wc destination_addr total_amount min_stake max_stake
+  }>
+  grams PROC:<{
+    // 
+    received_grams CALLDICT	//  _0
+  }>
+  admins PROC:<{
+    // 
+    load_data CALLDICT	//  _20 _21 _22 _23 _24 _25 _26
+    s3 s6 XCHG
+    6 BLKDROP	//  admins
+    NIL	//  admins result
+    OVER	//  admins result admins
+    DICTEMPTY	//  admins result _10
+    IFNOT:<{	//  admins result
+      -1 PUSHINT	//  admins result index=-1
+      UNTIL:<{
+        s2 PUSH
+        8 PUSHPOW2	//  admins result index admins _15=256
+        DICTUGETNEXT
+        NULLSWAPIFNOT
+        NULLSWAPIFNOT	//  admins result _28 _27 _29
+        s2 POP	//  admins result found index
+        OVER	//  admins result found index found
+        IF:<{	//  admins result found index
+          s2 s2 XCPU	//  admins index found result index
+          COMMA	//  admins index found result
+        }>ELSE<{
+          s0 s2 XCHG	//  admins index found result
+        }>
+        SWAP	//  admins index result found
+        NOT	//  admins index result _19
+        s1 s2 XCHG	//  admins result index _19
+      }>	//  admins result index
+      DROP
+      NIP	//  result
+    }>ELSE<{
+      NIP	//  result
+    }>
+  }>
+  whitelist PROC:<{
+    // 
+    load_data CALLDICT	//  _20 _21 _22 _23 _24 _25 _26
+    s1 s6 XCHG
+    6 BLKDROP	//  whitelist
+    NIL	//  whitelist result
+    OVER	//  whitelist result whitelist
+    DICTEMPTY	//  whitelist result _10
+    IFNOT:<{	//  whitelist result
+      -1 PUSHINT	//  whitelist result index=-1
+      UNTIL:<{
+        s2 PUSH
+        8 PUSHPOW2	//  whitelist result index whitelist _15=256
+        DICTUGETNEXT
+        NULLSWAPIFNOT
+        NULLSWAPIFNOT	//  whitelist result _28 _27 _29
+        s2 POP	//  whitelist result found index
+        OVER	//  whitelist result found index found
+        IF:<{	//  whitelist result found index
+          s2 s2 XCPU	//  whitelist index found result index
+          COMMA	//  whitelist index found result
+        }>ELSE<{
+          s0 s2 XCHG	//  whitelist index found result
+        }>
+        SWAP	//  whitelist index result found
+        NOT	//  whitelist index result _19
+        s1 s2 XCHG	//  whitelist result index _19
+      }>	//  whitelist result index
+      DROP
+      NIP	//  result
+    }>ELSE<{
+      NIP	//  result
+    }>
+  }>
+  members PROC:<{
+    // 
+    load_data CALLDICT	//  _22 _23 _24 _25 _26 _27 _28
+    s2 s6 XCHG
+    6 BLKDROP	//  members
+    PUSHNULL	//  members result
+    OVER	//  members result members
+    DICTEMPTY	//  members result _10
+    IFNOT:<{	//  members result
+      -1 PUSHINT	//  members result index=-1
+      UNTIL:<{
+        s2 PUSH
+        8 PUSHPOW2	//  members result index members _15=256
+        DICTUGETNEXT
+        NULLSWAPIFNOT
+        NULLSWAPIFNOT	//  members result value index found
+        DUP	//  members result value index found found
+        IF:<{	//  members result value index found
+          s0 s2 XCHG	//  members result found index value
+          LDGRAMS	//  members result found index _33 _32
+          DROP	//  members result found index _17
+          s1 s(-1) PUXC	//  members result found index index _17
+          PAIR	//  members result found index _19
+          s0 s3 XCHG2	//  members index found _19 result
+          CONS	//  members index found result
+        }>ELSE<{
+          2SWAP
+          DROP	//  members index found result
+        }>
+        SWAP	//  members index result found
+        NOT	//  members index result _21
+        s1 s2 XCHG	//  members result index _21
+      }>	//  members result index
+      DROP
+      NIP	//  result
+    }>ELSE<{
+      NIP	//  result
+    }>
+  }>
+  member_stake PROC:<{
+    //  wallet_addr
+    load_data CALLDICT	//  wallet_addr _17 _18 _19 _20 _21 _22 _23
+    s2 s6 XCHG
+    6 BLKDROP	//  wallet_addr members
+    8 PUSHPOW2	//  wallet_addr members _11=256
+    DICTUGET
+    NULLSWAPIFNOT	//  value found
+    IF:<{	//  value
+      LDGRAMS	//  _27 _26
+      DROP	//  _13
+    }>ELSE<{	//  value
+      DROP	// 
+      0 PUSHINT	//  _13=0
+    }>
+  }>
+  timeleft PROC:<{
+    // 
+    load_data CALLDICT	//  _25 _26 _27 _28 _29 _30 _31
+    s4 s6 XCHG
+    6 BLKDROP	//  config
+    unpack_config CALLDICT	//  _32 _33 _34 _35 _36 _37 _38 _39
+    5 BLKDROP
+    s2 POP	//  pool_lifetime pool_open
+    NOW	//  pool_lifetime pool_open now
+    s1 s2 PUSH2	//  pool_lifetime pool_open now pool_open pool_lifetime
+    ADD	//  pool_lifetime pool_open now _19
+    OVER	//  pool_lifetime pool_open now _19 now
+    GREATER	//  pool_lifetime pool_open now _20
+    IF:<{	//  pool_lifetime pool_open now
+      s0 s2 XCHG	//  now pool_open pool_lifetime
+      ADD	//  now _22
+      SWAP	//  _22 now
+      SUB	//  _21
+    }>ELSE<{	//  pool_lifetime pool_open now
+      3 BLKDROP	// 
+      0 PUSHINT	//  _21=0
+    }>
+  }>
+  withdrawals PROC:<{
+    // 
+    load_data CALLDICT	//  _31 _32 _33 _34 _35 _36 _37
+    s4 s6 XCHG
+    6 BLKDROP	//  config
+    unpack_config CALLDICT	//  _38 _39 _40 _41 _42 _43 _44 _45
+    7 BLKDROP	//  withdrawals
+    PUSHNULL	//  withdrawals result
+    OVER	//  withdrawals result withdrawals
+    DICTEMPTY	//  withdrawals result _19
+    IFNOT:<{	//  withdrawals result
+      -1 PUSHINT	//  withdrawals result index=-1
+      UNTIL:<{
+        s2 PUSH
+        8 PUSHPOW2	//  withdrawals result index withdrawals _24=256
+        DICTUGETNEXT
+        NULLSWAPIFNOT
+        NULLSWAPIFNOT	//  withdrawals result value index found
+        DUP	//  withdrawals result value index found found
+        IF:<{	//  withdrawals result value index found
+          s0 s2 XCHG	//  withdrawals result found index value
+          LDGRAMS	//  withdrawals result found index _50 _49
+          DROP	//  withdrawals result found index _26
+          s1 s(-1) PUXC	//  withdrawals result found index index _26
+          PAIR	//  withdrawals result found index _28
+          s0 s3 XCHG2	//  withdrawals index found _28 result
+          CONS	//  withdrawals index found result
+        }>ELSE<{
+          2SWAP
+          DROP	//  withdrawals index found result
+        }>
+        SWAP	//  withdrawals index result found
+        NOT	//  withdrawals index result _30
+        s1 s2 XCHG	//  withdrawals result index _30
+      }>	//  withdrawals result index
+      DROP
+      NIP	//  result
+    }>ELSE<{
+      NIP	//  result
+    }>
+  }>
+}END>c

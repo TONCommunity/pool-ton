@@ -1,0 +1,374 @@
+{
+    "START": {
+        "en": [
+            "@pool_ton_bot allows you to create contract-based pools on the TON blockchain network."
+        ],
+        "ru": [
+            "@pool_ton_bot предоставляет возможность создания пулов на основе контракта в блокчейн-сети TON."
+        ]
+    },
+    "LANGUAGE_SELECT": {
+        "en": [
+            "Select the interface language."
+        ],
+        "ru": [
+            "Выберите язык интерфейса."
+        ]
+    },
+    "SETTINGS": {
+        "en": [
+            "Settings"
+        ],
+        "ru": [
+            "Настройки."
+        ]
+    },
+    "FEEDBACK_INPUT": {
+        "en": [
+            "Enter the message for the administrator."
+        ],
+        "ru": [
+            "Введите сообщение для администратора."
+        ]
+    },
+    "FEEDBACK_SENT": {
+        "en": [
+            "Your message has been successfully delivered, thanks!"
+        ],
+        "ru": [
+            "Ваше сообщение успешно доставлено, спасибо!"
+        ]
+    },
+    "ADMIN": {
+        "en": [
+            "<code>Admin message:</code>",
+            "{message}"
+        ],
+        "ru": [
+            "<code>Сообщение от администратора:</code>",
+            "{message}"
+        ]
+    },
+    "UNKNOWN_COMMAND": {
+        "en": [
+            "Unknown command. Please use the keyboard."
+        ],
+        "ru": [
+            "Неизвестная команда. Пожалуйста, воспользуйтесь клавиатурой."
+        ]
+    },
+    "POOL_TYPE": {
+        "en": [
+            "Select a pool type:",
+            "Public - the pool is accessible to all users of the service from the main menu;",
+            "Non-public - access only by link sharing, the link is the only requirement for participation;",
+            "Private - access only by link sharing, administrator confirmation is required for participation."
+        ],
+        "ru": [
+            "Выберите тип пула:",
+            "Публичный - пул доступен всем пользователям сервиса из главного меню;",
+            "Непубличный - доступ только по ссылке, для участия достаточно наличия ссылки;",
+            "Приватный - доступ только по ссылке, для участия необходимо подтверждение создателя пула."
+        ]
+    },
+    "POOL_CREATE_SUCCESS": {
+        "en": [
+            "The pool was initialized, invitation link: {link}",
+            "pool adr:",
+            "{pool_adr}",
+            "",
+            "collection address:",
+            "{collection_adr}"
+        ],
+        "ru": [
+            "Пул был инициализирован, ссылка для приглашения участников: {link}",
+            "адрес пула:",
+            "{pool_adr}",
+            "",
+            "адрес сбора:",
+            "{collection_adr}"
+        ]
+    },
+    "POOL_DEPOSIT_SUCCESS": {
+        "en": [
+            "The deposit was made successfully, you'll be notified about contract initialization completion."
+        ],
+        "ru": [ 
+            "Средства успешно получены, ожидайте сообщения об окончании иницииализации контракта."
+        ]
+    },
+    "ACCESS_ERROR": {
+        "en": [
+            "available for the pool administrator only"
+        ],
+        "ru": [
+            "доступно только для администратора пула"
+        ]
+    },
+    "POOL_INFO": {
+        "en": [
+            "{pool_description}",
+            "",
+            "Invitation link: {link}",
+            "Pool address:",
+            "{pool_adr}",
+            "",
+            "Collection address:",
+            "{collection_adr}",
+            "",   
+            "Destination address:",
+            "{destination_adr}",
+            "",
+            "Minimum Contribution: {min_contribute} gram",   
+            "Maximum Contribution: {max_contribute} gram",
+            "Collected {received}/{total_amount} gram",
+            "The pool is closed in {time_left} seconds",
+            "Deposit from {user_adr} address is available for you"
+        ],
+        "ru": [
+            "{pool_description}",
+            "",
+            "Ссылка для приглашения участников в пул: {link}",
+            "",
+            "Адрес пула:",
+            "{pool_adr}",
+            "",
+            "Адрес сбора:",
+            "{collection_adr}",
+            "",
+            "Адрес назначения:",
+            "{destination_adr}",
+            "",
+            "Минимальная сумма взноса: {min_contribute} gram",
+            "Максимальная сумма взноса: {max_contribute} gram",
+            "Собрано {received}/{total_amount} gram",
+            "До закрытия пула осталось {time_left} сек.",
+            "Вам доступен взнос с адреса:",
+            "{user_adr}"
+        ]
+    },
+    "POOL_PARTICIPANTS_NO": {
+        "en": [
+            "There are no participants in the pool."
+        ],
+        "ru": [
+            "В пуле нет участников."
+        ]
+    },
+    "POOL_PARTICIPANTS": {
+        "en": [
+            "All the necessary scripts for administering the pool contract have been sent as an archive.",
+            "",
+            "To add participants to the whitelist, use the following command in the directory of the received scripts:",
+            "fift -s whitelist-add.fif \"The contents of the text file without quotes\""
+        ],
+        "ru": [
+            "Все необходимые скрипты для администрирования контракта пула отправлены архивом.",
+            "",
+            "Для добавления участников в вайтлист, воспользуйтесь следующей командой в директории с полученными скриптами:",
+            "fift -s whitelist-add.fif \"Содержимое текстового файла без кавычек\""
+        ]
+    },
+    "POOL_WAIT_APPROVE": {
+        "en": [
+            "Please wait for the approval of your request to the pool {pool_adr} by the pool administrator."
+        ],
+        "ru": [
+            "Ожидайте подтверждения заявки в пул {pool_adr} от администратора пула."
+        ]
+    },
+    "POOL_NEED_REQUEST": {
+        "en": [
+            "Pool type: {pool_type}, you need to send a request."
+        ],
+        "ru": [
+            "Тип пула: {pool_type}, необходимо отправить заявку."
+        ]
+    },
+    "POOL_NOT_EXIST": {
+        "en": [
+            "No pools are available to display."
+        ],
+        "ru": [
+            "Доступные для отображения пулы отсутствуют."
+        ]
+    },
+    "VALUE_INCORRECT": {
+        "en": [
+            "Incorrect value, please try again:",
+            ""
+        ],
+        "ru": [
+            "Введено некорректное значение, попробуйте снова:",
+            ""
+        ]
+    },
+    "ADR_INCORRECT": {
+        "en": [
+            "The address is incorrect, please try again."
+        ],
+        "ru": [
+            "Введен некорректный адрес, попробуйте снова."
+        ]
+    },
+    "ADR_EXIST_IN_POOL": {
+        "en": [
+            "The address is already in the pool."
+        ],
+        "ru": [
+            "Введенный адрес уже находится в пуле."
+        ]
+    },
+    "ADR_INPUT": {
+        "en": [
+            "Enter wallet address."
+        ],
+        "ru": [
+            "Введите адрес кошелька."
+        ]
+    },
+    "ADR_REPEAT_INPUT": {
+        "en": [
+            "Enter wallet address again"
+        ],
+        "ru": [
+            "Введите адрес кошелька еще раз"
+        ]
+    },
+    "REQUEST_SENT": {
+        "en": [
+            "The request to participate in the pool {pool_adr} has been sent to the pool administrator."
+        ],
+        "ru": [
+            "Заявка на участие в пуле {pool_adr} отправлена администратору пула."
+        ]
+    },
+    "REQUEST_ALREADY_SENT": {
+        "en": [
+            "The request to participate in the pool {pool_adr} has already been sent earlier."
+        ],
+        "ru": [
+            "Заявка на участие в пуле {pool_adr} уже была отправлена ранее."
+        ]
+    },
+    "REQUEST_APPROVED": {
+        "en": [
+            "The request to the pool {pool_adr} was approved by the pool administrator."
+        ],
+        "ru": [
+            "Заявка в пул {pool_adr} была одобрена администратором пула."
+        ]
+    },
+    "REQUEST_REJECTED": {
+        "en": [
+            "The request to the pool {pool_adr} was rejected by the pool administrator."
+        ],
+        "ru": [
+            "Заявка в пул {pool_adr} была отклонена администратором пула."
+        ]
+    },
+    "REQUEST_NEW": {
+        "en": [
+            "New request to the pool {pool_adr}",
+            "from @{username} (user_id: {user_id})"
+        ],
+        "ru": [
+            "Новая заявка в пул {pool_adr}",
+            "от @{username} (user_id: {user_id})"
+        ]
+    },
+    "REQUEST_AUTO_APPROVED": {
+        "en": [
+            "The request to the pool {pool_adr} was approved."
+        ],
+        "ru": [
+            "Заявка в пул {pool_adr} одобрена."
+        ]
+    },
+    "INPUT_DESCRIPTION": {
+        "en": [
+            "Enter the pool description, 1024 characters maximum."
+        ],
+        "ru": [
+            "Введите описание пула, не должно быть больше 1024 символов."
+        ]
+    },
+    "INPUT_WORKCHAIN": {
+        "en": [
+            "Enter workchain_id, should be 0 or -1."
+        ],
+        "ru": [
+            "Введите workchain_id, должен быть равен 0 или -1."
+        ]
+    },
+    "INPUT_TOTAL_AMOUNT": {
+        "en": [
+            "Enter the pool collection amount in grams, should be more than 1."
+        ],
+        "ru": [
+            "Введите сумму сбора пула в грам, должна быть больше 1."
+        ]
+    },
+    "INPUT_MIN_CONTRIBUTE": {
+        "en": [
+            "Enter the minimum possible contribution amount in grams, should be less than the collection ammount."
+        ],
+        "ru": [
+            "Введите минимально возможную сумму взноса в грам, должна быть меньше суммы сбора."
+        ]
+    },
+    "INPUT_MAX_CONTRIBUTE": {
+        "en": [
+            "Enter the maximum possible contribution amount in grams, should be greater than the minimum contribution amount and less than the collection amount."
+        ],
+        "ru": [
+            "Введите максимально возможную сумму взноса в грам, должна быть больше минимальной суммы взноса и меньше суммы сбора."
+        ]
+    },
+    "INPUT_POOL_LIFETIME": {
+        "en": [
+            "Enter the pool lifetime in seconds, should be less than 31556926."
+        ],
+        "ru": [
+            "Введите время жизни пула в секундах, должно быть меньше 31556926."
+        ]
+    },
+    "INPUT_ADMINS_PUBKEYS": {
+        "en": [
+            "Enter a list of public keys for pool administrators, space separated."
+        ],
+        "ru": [
+            "Введите список публичных ключей администраторов пула через пробел."
+        ]
+    },
+    "INPUT_LOCK_DESTINATION_ADR": {
+        "en": [
+            "Enter the destination address or skip."
+        ],
+        "ru": [
+            "Введите адрес назначения или пропустите ввод."
+        ]
+    },
+    "POOL_DEPOSIT": {
+        "en": [
+            "Deposit {amount} grams to the address:", 
+            "{adr}",
+            "",
+            "This amount will be used to pay commission fees for successful transactions."
+        ],
+        "ru": [
+            "Внесите {amount} грам на адрес:",
+            "{adr}",
+            "",
+            "Данная сумма пойдет на выплату комиссионных сборов успешных транзакций."
+        ]
+    },
+    "NO_ADR": {
+        "en": [
+            "any"
+        ],
+        "ru": [
+            "любой"
+        ]
+    }
+}

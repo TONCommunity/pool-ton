@@ -1,0 +1,29 @@
+#!/usr/bin/fift -s
+"TonUtil.fif" include
+
+{ ."usage: " @' $0 type ." <K> <pubkey1> [<pubkey2> <savefile>]" cr
+  ."Creates the message body to be sent from a wallet to delete <pubkeyN> from pool whitelist." cr
+  ."The result is saved into <savefile> (`whitelist-del-query.boc` by default) and output in hexadecimal form, to be sent later as the body of a message from the wallet to pool smart contract, along with a small value (say, one Gram) to cover forwarding and processing fees." cr 1 halt
+} : usage
+
+$# 2 < ' usage if
+$1 parse-int =: keys_length
+
+dictnew
+2 {
+  dup $# swap < abort"Not enough public keys were provided"
+  dup $() dup (number)
+    { swap drop }
+    { file>B dup Blen 32 <> abort"Public key must be exactly 32 bytes long" 256 B>u@ }
+    cond
+  rot 256 <b b> <s 3 -roll udict! drop swap 1+
+} keys_length times drop =: pubkeys
+
+2 keys_length + $() dup null? { drop "whitelist-del" } if =: savefile
+
+now =: query_id
+."query_id for whitelist del message is set to " query_id . cr
+
+<b x{44444444} s, query_id 64 u, pubkeys dict, b>
+cr ."Message body is " dup <s csr. cr
+2 boc+>B savefile +"-query.boc" tuck B>file ."Saved to file " type cr

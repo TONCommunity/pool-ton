@@ -1,0 +1,17 @@
+(cell) create_init_storage(int pubkey, cell config, cell admins, cell members, cell whitelist, int grams) impure {
+  cell init_storage = begin_cell()
+    .store_uint(0, 32)
+    .store_uint(pubkey, 256)
+    .store_dict(config)
+    .store_dict(admins)
+    .store_dict(members)
+    .store_dict(whitelist)
+    .store_grams(grams)
+  .end_cell();
+
+  return init_storage;
+}
+
+(cell) main (int pubkey, cell config, cell admins, cell members, cell whitelist, int grams) impure {
+  return create_init_storage(pubkey, config, admins, members, whitelist, grams);
+}
