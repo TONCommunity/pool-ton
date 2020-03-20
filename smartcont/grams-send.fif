@@ -14,7 +14,7 @@ def? $2 { @' $2 } { "grams-send" } cond =: savefile
 now =: query_id
 ."query_id for grams send message is set to " query_id . cr
 
-<b x{22222222} s, query_id 64 u, b{100} s, destination_addr addr, b>
+<b x{11111111} s, query_id 64 u, b{100} s, destination_addr addr, b>
 cr ."Message body is " dup <s csr. cr
 
 2 boc+>B savefile +"-query.boc" tuck B>file ."Saved to file " type cr

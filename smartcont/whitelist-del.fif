@@ -24,6 +24,6 @@ dictnew
 now =: query_id
 ."query_id for whitelist del message is set to " query_id . cr
 
-<b x{44444444} s, query_id 64 u, pubkeys dict, b>
+<b x{33333333} s, query_id 64 u, pubkeys dict, b>
 cr ."Message body is " dup <s csr. cr
 2 boc+>B savefile +"-query.boc" tuck B>file ."Saved to file " type cr

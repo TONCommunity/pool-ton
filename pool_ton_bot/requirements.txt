@@ -1,4 +1,0 @@
-requests
-telegram
-python-telegram-bot
-mongoengine
