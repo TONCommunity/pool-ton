@@ -3,7 +3,7 @@
 ## Links
 
 - [promo website](https://ton.ms/ "promo website")
-- [promo video](https://youtube.com/ "promo video")
+- [promo video](https://www.youtube.com/watch?v=j1TLFYJzGoM "promo video")
 
 ## Description
 
